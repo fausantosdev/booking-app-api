@@ -1,15 +1,18 @@
 import { Router } from 'express'
 
-import HotelController from '../controllers/HotelController'
+import hotelController from '../controllers/HotelController'
 
 import {verifyAdmin} from '../middlewares/auth'
 
 const routes = new Router()
 
-routes.get('/:id?', HotelController.index)
+routes.get('/find/:id?', hotelController.index)
 
-routes.post('/', verifyAdmin, HotelController.store)
-routes.put('/:id', verifyAdmin, HotelController.update)
-routes.delete('/:id', verifyAdmin, HotelController.remove)
+routes.get('/count-by-city', hotelController.countByCity)
+routes.get('/count-by-type', hotelController.countByType)
+
+routes.post('/', verifyAdmin, hotelController.store)
+routes.put('/:id', verifyAdmin, hotelController.update)
+routes.delete('/:id', verifyAdmin, hotelController.remove)
 
 export default routes

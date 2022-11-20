@@ -23,6 +23,46 @@ class HotelController {
         }
     }
 
+    async countByCity(req, res, next) {
+        const cities = req.query.cities.split(',')
+        
+        try {
+            const list = await Promise.all(cities.map(city => {
+                return Hotel.countDocuments({ city })
+            }))
+
+            //const hotels = await Hotel.find({}).sort({ createdAt: -1 })
+
+            return res.status(201).json({
+                status: true,
+                data: list
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    async countByType(req, res, next) {
+        /*const failed = true
+        if(failed) return next(createError(401,'You are not autenticated'))*/
+        const { id: _id } = req.params
+        
+        try {
+            if(_id){
+                const hotels = await Hotel.findOne({ _id })
+            }
+
+            const hotels = await Hotel.find({}).sort({ createdAt: -1 })
+
+            return res.status(201).json({
+                status: true,
+                data: hotels
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
     async store(req, res, next){   
         try {
             const newHotel = new Hotel(req.body)
