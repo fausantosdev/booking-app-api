@@ -24,6 +24,14 @@ class App {
         this.server.use(express.json())
 
         this.server.use(cookieParser())
+
+        this.server.use((error, req, res, next) => {
+            return res.status(error.status || 500).json({
+                status: false,
+                message: error.message || 'Ops, ocorreu um erro!',
+                //stack: error.stack || null
+            })
+        })
     }
 
     routes() {

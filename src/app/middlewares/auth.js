@@ -1,40 +1,67 @@
 import jwt from'jsonwebtoken'
+import { promisify } from 'util'
 import {createError} from '../../utils/error'
 
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   const token = req.cookies.access_token
 
-  if(!token){
-    return next(createError(401, 'Unauthorized, token not provided!'))
+  //if(token === 'undefined') return next(createError(401, 'Unauthorized! Token not Provided.'))
+
+  try {
+    const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET)
+
+    req.user = decoded.user
+
+    return next()
+  } catch (err) {
+    return res.status(401).json({
+       status: false,
+       data: null,
+       message: err.message
+    })
   }
-
-  jwt.verify(token, process.env.APP_SECRET , function(err, decoded) {
-    if(err) return next(createError(401, err.message))
-    
-    const { user } = decoded
-
-    req.user = user
-
-    next()
-  });
 }
 
 export const verifyUser = (req, res, next) => {
   verifyToken(req, res, () => {
-    if(req.user._id === req.params.id || req.user.isAdmin) {
-      return next()
-    }else{
-      return next(createError(401, 'Unauthorized!'))
+    try {
+      if(req.user._id === req.params.id || req.user.isAdmin) {
+        return next()
+      }else{
+        return res.status(401).json({
+          status: false,
+          data: null,
+          message: 'Unauthorized!'
+        })
+      }
+    } catch (error) {
+      return res.status(401).json({
+        status: false,
+        data: null,
+        message: err.message
+     })
     }
   })
 }
 
 export const verifyAdmin = (req, res, next) => {
   verifyToken(req, res, () => {
-    if(req.user.isAdmin) {
-      return next()
-    }else{
-      return next(createError(401, 'Unauthorized!'))
+    try {
+      if(req.user.isAdmin) {
+        return next()
+      }else{
+        return res.status(401).json({
+          status: false,
+          data: null,
+          message: 'Unauthorized!'
+        })
+      }
+    } catch (error) {
+      return res.status(401).json({
+        status: false,
+        data: null,
+        message: err.message
+      })
     }
   })
 }

@@ -1,3 +1,5 @@
+import * as Yup from 'yup'
+
 import {createError} from '../../utils/error'
 import Hotel from '../schemes/Hotel'
 
@@ -12,7 +14,9 @@ class HotelController {
                 const hotels = await Hotel.findOne({ _id })
             }
 
-            const hotels = await Hotel.find({}).sort({ createdAt: -1 })
+            const hotels = await Hotel.find({})
+                .populate({ path: 'user', select: 'username' })
+                .sort({ createdAt: -1 })
 
             return res.status(201).json({
                 status: true,
@@ -63,9 +67,39 @@ class HotelController {
         }
     }
 
-    async store(req, res, next){   
+    async store(req, res, next){
+        const schema = Yup.object().shape({
+            name: Yup.string().required(),
+            type: Yup.string().required(),
+            city: Yup.string().required(),
+            address: Yup.string().required(),
+            distance: Yup.string().required(),
+            description: Yup.string().required(),
+            rating: Yup.number().required(),
+            cheapestPrice: Yup.number().required(),
+        })
+
+        if(!(await schema.isValid(req.body))){
+            return res.status(400).json({
+                status: false,
+                message: 'Erro de validação' 
+            })
+        }
+
+        const { name, type, city, address, distance, description, rating, cheapestPrice } = req.body
+
         try {
-            const newHotel = new Hotel(req.body)
+            const newHotel = new Hotel({
+                user: req.user._id,
+                name,
+                type,
+                city,
+                address,
+                distance,
+                description,
+                rating,
+                cheapestPrice
+            })
     
             const savedHotel = await newHotel.save()    
         

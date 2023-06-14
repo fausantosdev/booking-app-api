@@ -1,4 +1,4 @@
-//const Yup = require('yup')
+import Yup from 'yup'
 import bcrypt from 'bcryptjs'
 
 import User from '../schemes/User'
@@ -41,7 +41,23 @@ class UserController {
     }
 
     async store(req, res, next){   
+
+        const schema = Yup.object().shape({
+            name: Yup.string().required(),
+            username: Yup.string().required(),
+            email: Yup.string().required(),
+            password: Yup.string().required()
+        })
+
+        if(!(await schema.isValid(req.body))){
+            return res.status(400).json({
+                status: false,
+                message: 'Validation fails'
+            })
+        } 
+
         try {
+            // Verificar se email existe
             const emailExists = await User.findOne({email: req.body.email})
 
             if(emailExists){
@@ -51,6 +67,7 @@ class UserController {
                 })
             }
 
+             // Verificar se username existe
             const usernameExists = await User.findOne({username: req.body.username})
 
             if(usernameExists){
@@ -60,7 +77,7 @@ class UserController {
                 })
             }
         
-            const {username, email, password} = req.body
+            const {name, username, email, password} = req.body
 
             let password_hash = await bcrypt.hash(password, 8)
 
@@ -72,7 +89,10 @@ class UserController {
     
             const savedUser = await newUser.save()    
         
-            return res.status(200).json(savedUser)
+            return res.status(200).json({
+                status: true,
+                data: savedUser
+            })
         } catch (error) {
             return next(error)
         }

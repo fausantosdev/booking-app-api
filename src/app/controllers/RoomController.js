@@ -5,13 +5,13 @@ import Hotel from '../schemes/Hotel'
 class RoomController {
     async index(req, res, next) {
         const { id: _id } = req.params
+
+        let rooms
         
         try {
-            if(_id){
-                const room = await Room.findOne({ _id })
-            }
-
-            const rooms = await Room.find({}).sort({ createdAt: -1 })
+            rooms = _id ?
+                rooms = await Room.findOne({ _id }) :
+                rooms = await Room.find({}).sort({ createdAt: -1 })
 
             return res.status(201).json({
                 status: true,
@@ -29,15 +29,14 @@ class RoomController {
             const newRoom = new Room(req.body)
     
             const savedRoom = await newRoom.save() 
-            
-            try{
-                await Hotel.findByIdAndUpdate(hotelId, {
-                    $push: { rooms: savedRoom._id }
-                })    
 
-            } catch (error) {
-                return next(error)
-            }
+            const hotelExists = await Hotel.findById(hotelId)
+
+            if (!hotelExists) next('Hotel não existe')
+            
+            await Hotel.findByIdAndUpdate(hotelId, {
+                $push: { rooms: savedRoom._id }
+            })    
         
             return res.status(201).json({
                 status: true,

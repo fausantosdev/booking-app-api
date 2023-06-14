@@ -3,12 +3,11 @@ import mongoose from 'mongoose'
 const {Schema} = mongoose
 
 const hotelSchema = new Schema({
-    /* user: {
+    user: {
         type: mongoose.Types.ObjectId,
         required: true,
-        unique: true,
         ref: 'User'
-    }, */
+    },
     name: {
         type: String,
         required: true
@@ -29,10 +28,6 @@ const hotelSchema = new Schema({
         type: String,
         required: true
     },
-    title: {
-        type: String,
-        required: true
-    },
     description: {
         type: String,
         required: true
@@ -45,12 +40,14 @@ const hotelSchema = new Schema({
         required: true
     },
     rooms: {
-        type: [String],
-        //required: true
+        type: [{
+            type: mongoose.Types.ObjectId,
+            unique: true,
+            ref: 'Room'
+        }],
     },
     photos: {
         type: [String],
-        //required: true
     },
     cheapestPrice: {
         type: Number,

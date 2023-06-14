@@ -1,4 +1,4 @@
-//const Yup = require('yup')
+import Yup from 'yup'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
@@ -11,9 +11,11 @@ import {createError} from '../../utils/error'
 class AuthController {
 
     async login(req, res, next){
+
+        //if (true) return next(createError(401, 'Errrrrooooouu'))
         
-        /*const schema = Yup.object().shape({
-            email: Yup.string().email().required(),
+        const schema = Yup.object().shape({
+            username: Yup.string().required(),
             password: Yup.string().required()
         })
 
@@ -22,7 +24,7 @@ class AuthController {
                 status: false,
                 message: 'Validation fails'
             })
-        }*/
+        }   
 
         const {username: _username, password} = req.body
 
@@ -50,8 +52,9 @@ class AuthController {
             const accessToken = jwt.sign({ user: { _id, isAdmin } }, authConfig.secret, { expiresIn: authConfig.expiresIn })
 
             return res
-                .cookie('access_token', accessToken, {
-                    httpOnly: true
+                .cookie('access_token', accessToken, {// OBS: pesqusar
+                    httpOnly: true,
+                    expiresIn: new Date(Date.now() + 1)// Data atual mais uma(1) hora
                 })
                 .status(200)
                 .json({
@@ -61,8 +64,7 @@ class AuthController {
                             _id,
                             username,
                             email
-                        },
-                        accessToken,
+                        }
                     }
                 })
         } catch (error) {

@@ -6,7 +6,6 @@ import {verifyUser, verifyAdmin} from '../middlewares/auth'
 
 const routes = new Router()
 
-
 routes.post('/',UserController.store)
 routes.get('/', verifyAdmin, UserController.index)
 routes.get('/:id', verifyUser, UserController.show)
