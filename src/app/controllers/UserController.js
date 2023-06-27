@@ -1,6 +1,8 @@
 import Yup from 'yup'
 import bcrypt from 'bcryptjs'
 
+import { createError } from '../../utils/error'
+
 import User from '../schemes/User'
 
 class UserController {
@@ -18,18 +20,12 @@ class UserController {
     }
 
     async show(req, res, next) {
-
         const { id: _id } = req.params
 
         try {
             const user = await User.findById({ _id })
 
-            if(!user){
-                return res.json({
-                    status: false,
-                    message: 'Usuário não encontrado!'
-                })
-            }
+            if (!user) return next(createError(200, 'Usuário não encontrado'))
 
             return res.json({
                 status: true,
@@ -57,25 +53,13 @@ class UserController {
         } 
 
         try {
-            // Verificar se email existe
             const emailExists = await User.findOne({email: req.body.email})
 
-            if(emailExists){
-                return res.json({
-                    status: false,
-                    message: 'Email já registrado'
-                })
-            }
-
-             // Verificar se username existe
+            if (emailExists) return next(createError(200, 'O email fornecido já está em uso. Por favor, forneça um email diferente para prosseguir.'))
+    
             const usernameExists = await User.findOne({username: req.body.username})
 
-            if(usernameExists){
-                return res.json({
-                    status: false,
-                    message: 'Nome de usuário já esta sendo utilizado'
-                })
-            }
+            if(usernameExists) return next(createError(200, 'Ops! O nome de usuário que você escolheu já está sendo utilizado. Por favor, selecione outro nome de usuário.'))
         
             const {name, username, email, password} = req.body
 
@@ -105,12 +89,7 @@ class UserController {
         try {
             const userExists = await User.findById({_id})// Verifica se o usuário existe
 
-            if(!userExists){
-                return res.json({
-                    status: false,
-                    message: 'Usuário não encontardo'
-                })
-            }
+            if (!userExists) return next(createError(200, 'Usuário não encontrado'))
 
             const updated = await User.findByIdAndUpdate(// Atualiza o usuário
                 { _id },
@@ -136,13 +115,8 @@ class UserController {
         try {
             const userExists = await User.findById({_id})
 
-            if(!userExists){
-                return res.json({
-                    status: false,
-                    message: 'Usuário não encontrado'
-                })
-            }
-            
+            if (!userExists)  return next(createError(200, 'Usuário não encontrado'))
+                
             const removed = await User.deleteOne({_id})
 
             return res.json({
