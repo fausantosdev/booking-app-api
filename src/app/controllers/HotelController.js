@@ -5,15 +5,7 @@ import Hotel from '../schemes/Hotel'
 
 class HotelController {
     async index(req, res, next) {
-        /*const failed = true
-        if(failed) return next(createError(401,'You are not autenticated'))*/
-        const { id: _id } = req.params
-        
         try {
-            if(_id){
-                const hotels = await Hotel.findOne({ _id })
-            }
-
             const hotels = await Hotel.find({})
                 .populate({ path: 'user', select: 'username' })
                 .sort({ createdAt: -1 })
@@ -118,12 +110,7 @@ class HotelController {
         try {
             const hotelExists = await Hotel.findById({_id})
 
-            if(!hotelExists){
-                return res.json({
-                    status: false,
-                    message: 'Hotel não encontrado'
-                })
-            }
+            if (!hotelExists) return next(createError(200, 'Hotel não encontrado'))
 
             const updated = await Hotel.findByIdAndUpdate(
                 { _id },
@@ -135,7 +122,6 @@ class HotelController {
                 status: true,
                 data: updated
             })
-
         } catch (error) {
             return next(error)
         }
@@ -147,12 +133,8 @@ class HotelController {
         try {
             const userExists = await Hotel.findById({_id})
 
-            if(!userExists){
-                return res.json({
-                    status: 'Hotel não encontrado'
-                })
-            }
-            
+            if (!userExists)  return next(createError(200, 'Hotel não encontrado'))
+                
             const removed = await Hotel.deleteOne({_id})
 
             return res.json({

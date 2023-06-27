@@ -9,11 +9,7 @@ import User from '../schemes/User'
 import {createError} from '../../utils/error'
 
 class AuthController {
-
     async login(req, res, next){
-
-        //if (true) return next(createError(401, 'Errrrrooooouu'))
-        
         const schema = Yup.object().shape({
             username: Yup.string().required(),
             password: Yup.string().required()
@@ -28,31 +24,20 @@ class AuthController {
 
         const {username: _username, password} = req.body
 
-
         try {
             //const {password, ...data} = await User.findOne({email})
             const user = await User.findOne({username: _username})
 
-            if(!user){
-                return res.json({
-                    status: false,
-                    message: 'Usuário não existe'
-                })
-            }
+            if (!user)  return next(createError(200, 'Usuário não encontrado'))
 
-            if(!(await bcrypt.compare(password, user.password))){
-                return res.json({
-                    status: false,
-                    message: 'Senha incorreta'
-                })
-            }
+            if(!(await bcrypt.compare(password, user.password)))  return next(createError(200, 'Senha incorreta'))
 
             const {_id, username, email, isAdmin} = user
 
             const accessToken = jwt.sign({ user: { _id, isAdmin } }, authConfig.secret, { expiresIn: authConfig.expiresIn })
 
             return res
-                .cookie('access_token', accessToken, {// OBS: pesqusar
+                .cookie('access_token', accessToken, {// OBS: pesquisar
                     httpOnly: true,
                     expiresIn: new Date(Date.now() + 1)// Data atual mais uma(1) hora
                 })
@@ -70,7 +55,6 @@ class AuthController {
         } catch (error) {
             return next(error)
         }
-        
     }
 }
 

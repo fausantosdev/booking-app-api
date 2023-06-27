@@ -3,15 +3,9 @@ import Room from '../schemes/Room'
 import Hotel from '../schemes/Hotel'
 
 class RoomController {
-    async index(req, res, next) {
-        const { id: _id } = req.params
-
-        let rooms
-        
+    async index(req, res, next) { 
         try {
-            rooms = _id ?
-                rooms = await Room.findOne({ _id }) :
-                rooms = await Room.find({}).sort({ createdAt: -1 })
+            const rooms = await Room.find({}).sort({ createdAt: -1 })
 
             return res.status(201).json({
                 status: true,
@@ -32,7 +26,7 @@ class RoomController {
 
             const hotelExists = await Hotel.findById(hotelId)
 
-            if (!hotelExists) next('Hotel não existe')
+            if (!hotelExists) return next(createError(200, 'Hotel não encontrado'))
             
             await Hotel.findByIdAndUpdate(hotelId, {
                 $push: { rooms: savedRoom._id }
@@ -53,12 +47,7 @@ class RoomController {
         try {
             const roomExists = await Room.findById({_id})
 
-            if(!roomExists){
-                return res.json({
-                    status: false,
-                    message: 'Quarto não encontrado'
-                })
-            }
+            if (!roomExists) return next(createError(200, 'Quarto não encontrado'))
 
             const updated = await Room.findByIdAndUpdate(
                 { _id },
@@ -82,12 +71,8 @@ class RoomController {
         try {
             const roomExists = await Room.findById({_id})
 
-            if(!roomExists){
-                return res.json({
-                    status: 'Quarto não encontrado'
-                })
-            }
-            
+            if (!roomExists) return next(createError(200, 'Quarto não encontrado'))
+
             const removed = await Room.deleteOne({_id})
 
             try{
