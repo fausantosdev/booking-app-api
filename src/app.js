@@ -24,7 +24,11 @@ class App {
         this.server.use(express.json())
 
         this.server.use(cookieParser())
+    }
 
+    routes() {
+        this.server.use(routes)
+        
         this.server.use((error, req, res, next) => {
             return res.status(error.status || 500).json({
                 status: false,
@@ -32,10 +36,6 @@ class App {
                 //stack: error.stack || null
             })
         })
-    }
-
-    routes() {
-        this.server.use(routes) 
     }
 }
 
