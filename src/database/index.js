@@ -6,6 +6,8 @@ class Database {
   }
 
   mongo() {
+    mongoose.set('strictQuery', false)
+    
     this.mongoConnection = mongoose.connect(process.env.MONGO_URL, {
       useNewUrlParser: true,
       //useFindAndModify: true,
