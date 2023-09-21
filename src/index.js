@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import app from './App'
+import app from './app'
 
 const PORT = app.get('port')
 
